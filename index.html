@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>Introduction to d3.js</title>
+    <meta charset='utf-8'>
+    <script type='text/javascript' src='d3.v2.min.js'></script>
+    <script type='text/javascript' src='jquery.min.js'></script>
+    <script type='text/javascript' src='slides.js'></script>
+    <link rel='stylesheet' href='d3.class.css' />
+  </head>
+
+  <body style='display: none'>
+    <section class='slides layout-regular'>
+      <article>
+        <h1>
+          Introduction to d3.js and
+          <br>
+          Data-Driven Visualizations
+        </h1>
+        <p>
+          Kenny Peng
+          <br>
+          April 9, 2012
+        </p>
+      </article>
+
+      <article>
+        <h3>What is d3.js and why should I use it?</h3>
+        <ul>
+          <li>JavaScript library for manipulation of data-driven
+          visualizations</li>
+          <li>Leverages web standards: HTML5, CSS3, SVG</li>
+          <li>Feature set is simple and focuses on transformations on data rather
+          than how to represent data</li>
+          <li>There isn't a set of new vocabulary or marks to learn, and you have
+          direct access to browser capabilities</li>
+        </ul>
+      </article>
+
+      <article>
+        <h3>Useful knowledge before you dive in...</h3>
+        <ul>
+          <li>
+            <p>SVG – XML-like syntax for vector graphics.  d3.js will take care
+            of most of the details, but it's useful to know for debugging.</p>
+          </li>
+          <li>
+            <p>CSS3 – d3.js uses selectors to refer to elements.  A quick run-
+            down of the most common ones:
+            </p>
+            <pre><span class='nocode'>#foo       // &lt;any id='foo'&gt;
+foo        // &lt;foo&gt;
+.foo       // &lt;any class='foo'&gt;
+[foo=bar]  // &lt;any foo='bar'&gt;
+foo bar    // &lt;foo&gt;&lt;bar&gt;&lt;/foo&gt;</span></pre>
+          </li>
+        </ul>
+      </article>
+
+      <article>
+        <h3>
+          Setup
+        </h3>
+        <pre>&lt;!DOCTYPE html&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;&gt;
+  &lt;script type=&quot;text/javascript&quot; src=&quot;d3.v2.min.js&quot;&gt;&lt;/script&gt;
+  &lt;script type=&quot;text/javascript&quot; src=&quot;jquery.min.js&quot;&gt;&lt;/script&gt;
+  &lt;script type=&quot;text/javascript&quot; src=&quot;d3.class.js&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+
+&lt;body&gt;
+  &lt;div class=&quot;visualization&quot;&gt;Hello World!&lt;/div&gt;
+&lt;/body&gt;</pre>
+        <div class='visualization1'>Hello World!</div>
+      </article>
+
+      <article class='smaller'>
+        <h3>Simple example: a bar chart</h3>
+        <pre>var data = [5, 2, 9, 7, 6, 1];
+var width = 778, height = 480, chunk = width / data.length;
+
+var chart = d3.select('#visualization2')
+  .append('svg')
+    .attr('class', 'chart')
+    .attr('width', width)
+    .attr('height', height)
+  .append('g')
+    .attr('transform', 'translate(10, 15)');
+
+var x = d3.scale.ordinal()
+  .domain(data)
+  .rangeBands([0, width]);
+
+var y = d3.scale.linear()
+  .domain([0, 10])
+  .rangeRound([0, height]);
+
+chart.selectAll('rect')
+  .data(data)
+  .enter().append('rect')
+    .attr('x', function(d, i) { return i * chunk; })
+    .attr('y', function(d) { return height - y(d); })
+    .attr('width', chunk)
+    .attr('height', y);</pre>
+      </article>
+
+      <article>
+        <h3>... and the results.</h3>
+        <div id='visualization2'></div>
+        <script>
+$(function() {
+  var data = [5, 2, 9, 7, 6, 1];
+  var width = 760, height = 480, chunk = width / data.length;
+
+  var chart = d3.select('#visualization2')
+    .append('svg')
+      .attr('class', 'chart')
+      .attr('width', width)
+      .attr('height', height)
+    .append('g')
+      .attr('transform', 'translate(10, 15)');
+
+  var x = d3.scale.ordinal()
+    .domain(data)
+    .rangeBands([0, width]);
+
+  var y = d3.scale.linear()
+    .domain([0, 10])
+    .range([0, height]);
+
+  chart.selectAll('rect')
+    .data(data)
+    .enter().append('rect')
+      .attr('x', x)
+      .attr('y', function(d) { return height - y(d); })
+      .attr('width', chunk)
+      .attr('height', y);
+});
+        </script>
+      </article>
+
+      <article>
+        <h3>So what is the code doing?</h3>
+        <div class='build'>
+          <pre>// Construct the SVG element (the &quot;canvas&quot;)
+var chart = d3.select('#visualization')
+  .append('svg')
+    .attr('class', 'chart')
+    .attr('width', width)
+    .attr('height', height)
+  .append('g')
+    .attr('transform', 'translate(10, 15)');</pre>
+          <pre>// This scale will carve up our horizontal space
+var x = d3.scale.ordinal()
+  .domain(data)
+  .rangeBands([0, width]);
+
+// This scale maps our values to heights
+var y = d3.scale.linear()
+  .domain([0, 10])
+  .range([0, height]);</pre>
+        </div>
+      </article>
+
+      <article>
+        <h3>So what is the code doing?</h3>
+        <div class='build'>
+          <pre>// Bind data and compute attributes for elements
+chart.selectAll('rect')
+  .data(data)
+  .enter().append('rect')
+    .attr('x', function(d, i) { return i * chunk; })
+    .attr('y', function(d) { return height - y(d); })
+    .attr('width', chunk)
+    .attr('height', y);</pre>
+          <ul>
+            <li>You write what you want to happen in a declarative way</li>
+            <li>Instead of creating rectangles, you map the set of rectangles to
+            your data and describe what the process for constructing the elements
+            is</li>
+            <li>This concept is called the <em>data-join</em></li>
+          </ul>
+        </div>
+      </article>
+
+      <article class='smaller'>
+        <h3>Data-joins Explained</h3>
+        <svg class='joins' width='720' height='360'>
+          <g transform='translate(0,196)'>
+            <g transform='translate(270)'>
+              <circle style='fill: #3182BD;' r='150'></circle>
+              <text y='-160' style='font-weight: bold; ' dy='.20em'
+                    text-anchor='middle'>Data</text>
+              <text x='-30' dy='.35em' text-anchor='middle'>Enter</text>
+            </g>
+            <text x='360' dy='.35em' text-anchor='middle'>Update</text>
+            <g transform='translate(450)'>
+              <circle style='fill: #E6550D;' r='150'></circle>
+              <text y='-160' style='font-weight: bold; ' dy='.20em'
+                    text-anchor='middle'>Elements</text>
+              <text x='30' dy='.35em' text-anchor='middle'>Exit</text>
+            </g>
+          </g>
+        </svg>
+        <p>
+          The <code>data(data)</code> call binds the data to (SVG) elements, and
+          produces three virtual selections: <code>enter</code>, <code>
+          update</code>, and <code>exit</code>. <code>enter</code> contains
+          placeholders for any missing elements. <code>update</code> contains
+          existing elements, bound to data. Any remaining elements end up in
+          <code>exit</code> for removal.
+        </p>
+        <p>
+          Note: <code>enter</code> and <code>exit</code> have explicit selectors, but
+          <code>update</code> is implicit via the existing selection.
+        </p>
+      </article>
+
+      <article>
+        <h3>Adding some labels</h3>
+        <pre>chart.selectAll('text')
+  .data(data)
+  .enter().append('text')
+    .attr('x', function(d) { return x(d) + x.rangeBand() / 2; } )
+    .attr('y', function(d) { return height - y(d); })
+    .attr('dy', '-.35em')
+    .attr('text-anchor', 'middle')
+    .text(String);</pre>
+      </article>
+
+      <article>
+        <h3>... and what it looks like.</h3>
+        <div id='visualization3'></div>
+        <script>
+$(function() {
+  var data = [5, 2, 9, 7, 6, 1];
+  var width = 760, height = 480, chunk = width / data.length;
+
+  var chart = d3.select('#visualization3')
+    .append('svg')
+      .attr('class', 'chart')
+      .attr('width', width)
+      .attr('height', height)
+    .append('g')
+      .attr('transform', 'translate(10, 15)');
+
+  var x = d3.scale.ordinal()
+    .domain(data)
+    .rangeBands([0, width]);
+
+  var y = d3.scale.linear()
+    .domain([0, 10])
+    .range([0, height]);
+
+  chart.selectAll('rect')
+    .data(data)
+    .enter().append('rect')
+      .attr('x', x)
+      .attr('y', function(d) { return height - y(d); })
+      .attr('width', chunk)
+      .attr('height', y);
+
+  chart.selectAll('text')
+    .data(data)
+    .enter().append('text')
+      .attr('x', function(d) { return x(d) + x.rangeBand() / 2; } )
+      .attr('y', function(d) { return height - y(d); })
+      .attr('dy', '-.35em')
+      .attr('text-anchor', 'middle')
+      .text(String);
+});
+        </script>
+      </article>
+
+      <article>
+        <h2>But wait, there's more!</h2>
+      </article>
+
+      <article>
+        <h3>Dynamic Visualizations</h3>
+        <div id='visualization4'></div>
+        <script>
+$(function() {
+  var time = 0;
+  var data = [next(),
+              next(),
+              next(),
+              next(),
+              next(),
+              next()];
+
+  var width = 760, height = 480, chunk = width / data.length;
+
+  function next() {
+    return {
+      time: ++time,
+      value: Math.ceil(Math.random() * 10)
+    }
+  }
+
+  setInterval(function() {
+    data.shift();
+    data.push(next());
+    redraw();
+  }, 1500);
+
+  var chart = d3.select('#visualization4')
+    .append('svg')
+      .attr('class', 'chart')
+      .attr('width', width)
+      .attr('height', height + 40)
+    .append('g')
+      .attr('transform', 'translate(0, 40)');
+
+  var x = d3.scale.linear()
+    .domain([0, 1])
+    .range([0, chunk]);
+
+  var y = d3.scale.linear()
+    .domain([0, 10])
+    .rangeRound([0, height]);
+
+  redraw();
+
+  function redraw() {
+    var rect = chart.selectAll('rect')
+      .data(data, function(d) { return d.time; });
+
+    var labels = chart.selectAll('text')
+      .data(data, function(d) { return d.time; });
+
+    // Enter...
+    rect.enter()
+      .insert('rect', 'text')
+        .attr('x', function(d, i) { return x(i + 1) - .5; })
+        .attr('y', function(d) { return height - y(d.value) - .5; })
+        .attr('width', chunk)
+        .attr('height', function(d) { return y(d.value); })
+      .transition()
+        .duration(1000)
+        .attr('x', function(d, i) { return x(i) - .5; });
+
+    labels.enter()
+      .append('text')
+        .attr('x', function(d, i) { return x(i + 1.5) - .5; })
+        .attr('y', function(d) { return height - y(d.value) - .5; })
+        .attr('dy', '-.35em')
+        .attr('text-anchor', 'middle')
+        .text(function(d) { return d.value; })
+      .transition()
+        .duration(1000)
+        .attr('x', function(d, i) { return x(i + .5) - .5; });
+
+    // Update...
+    rect.transition()
+      .duration(1000)
+      .attr('x', function(d, i) { return x(i) - .5; });
+
+    labels.transition()
+      .duration(1000)
+      .attr('x', function(d, i) { return x(i + .5) - .5; });
+
+    // Exit...
+    rect.exit().transition()
+      .duration(1000)
+      .attr('x', function(d, i) { return x(i - 1) - .5; })
+      .remove();
+
+    labels.exit().transition()
+      .duration(1000)
+      .attr('x', function(d, i) { return x(i - .5) - .5; })
+      .remove();
+  }
+});
+        </script>
+      </article>
+
+      <article class='smaller'>
+        <h3>Breaking it down...</h3>
+        <pre>// Got lazy here, but I'm just generating some random data
+var time = 0;
+var data = [next(), next(), next(), next(), next(), next()];
+
+// Sizing parameters
+var width = 760, height = 480, chunk = width / data.length;
+
+// Generate random integers between 1 and 10, associated with monotonically
+// increasing time
+function next() {
+  return {
+    time: ++time,
+    value: Math.ceil(Math.random() * 10)
+  }
+}
+
+// Periodic function to remove the beginning data point, add a new point, and
+// redraw everything
+setInterval(function() {
+  data.shift();
+  data.push(next());
+
+  // This function rebinds the data, computes the "enter", "exit", and "update"
+  // selections and causes everything to redraw
+  redraw();
+}, 1500);</pre>
+      </article>
+
+      <article class='smaller'>
+        <h3>Breaking it down...</h3>
+        <pre>var chart = d3.select('#visualization')
+  .append('svg')
+    .attr('class', 'chart')
+    .attr('width', width)
+    // So we have room for our labels
+    .attr('height', height + 40)
+  .append('g')
+    // So we have room for our labels, you can see that you can apply group-wide
+    // transformations on the SVG sets here
+    .attr('transform', 'translate(0, 40)');
+
+// This is a bit of a cheat, because we're assuming the time points are
+// "contiguous", i.e. there's no gaps
+var x = d3.scale.linear()
+  .domain([0, 1])
+  .range([0, chunk]);
+
+var y = d3.scale.linear()
+  .domain([0, 10])
+  .rangeRound([0, height]);
+
+// Calling this the first time will create the initial render... this function is
+// magical
+redraw();</pre>
+      </article>
+
+      <article class='smaller'>
+        <h3>Breaking it down...</h3>
+        <pre>function redraw() {
+  // The second arguments here are specifications on how the data should be
+  // bound to elements
+  var rect = chart.selectAll('rect').data(data, function(d) { return d.time; });
+  var labels = chart.selectAll('text').data(data, function(d) { return d.time; });
+
+  // All these -.5 offsets are to address anti-aliasing artifacts, but I'm
+  // feeling pedantic
+
+  // Enter...
+  rect.enter().insert('rect', 'text')
+      .attr('x', function(d, i) { return x(i + 1) - .5; })
+      .attr('y', function(d) { return height - y(d.value) - .5; })
+      .attr('width', chunk)
+      .attr('height', function(d) { return y(d.value); })
+    .transition().duration(1000) // Transition should last 1 second
+      .attr('x', function(d, i) { return x(i) - .5; });
+
+  labels.enter().append('text')
+      .attr('x', function(d, i) { return x(i + 1.5) - .5; })
+      .attr('y', function(d) { return height - y(d.value) - .5; })
+      .attr('dy', '-.35em')
+      .attr('text-anchor', 'middle')
+      .text(function(d) { return d.value; })
+    .transition().duration(1000) // Transition should last 1 second
+      .attr('x', function(d, i) { return x(i + .5) - .5; });</pre>
+      </article>
+
+      <article class='smaller'>
+        <h3>Breaking it down...</h3>
+        <pre>  // Update...
+  rect.transition()
+    .duration(1000)
+    .attr('x', function(d, i) { return x(i) - .5; });
+
+  labels.transition()
+    .duration(1000)
+    .attr('x', function(d, i) { return x(i + .5) - .5; });
+
+  // Exit...
+  rect.exit().transition()
+    .duration(1000)
+    .attr('x', function(d, i) { return x(i - 1) - .5; })
+    .remove();
+
+  labels.exit().transition()
+    .duration(1000)
+    .attr('x', function(d, i) { return x(i - .5) - .5; })
+    .remove();
+}</pre>
+      </article>
+
+      <article>
+        <h3>d3.js Components</h3>
+        <ul>
+          <li>d3 (core)</li>
+          <li>d3.scale - Quantitative scales</li>
+          <li>d3.svg - SVG shapes, axes, and controls</li>
+          <li>d3.time - Time functions</li>
+          <li>d3.layout - Bundles, chords, trees, etc.</li>
+          <li>d3.geo - Geographic features and projections</li>
+          <li>d3.geom - Polygons, contours, and hull</li>
+          <li>d3.behavior - Zoom and drag</li>
+        </ul>
+      </article>
+
+      <article>
+        <h3>Further Reading and References</h3>
+        <ul>
+          <li>d3.js <a href='http://mbostock.github.com/d3/'>Home</a>,
+          <a href='https://github.com/mbostock/d3/wiki/API-Reference'>APIs</a></li>
+          <li><a href='http://bost.ocks.org/mike/join/'>Mike Bostock -
+          Thinking with Joins</a></li>
+          <li><a href='http://bost.ocks.org/mike/d3/workshop/'>Mike Bostock -
+          D3 Workshop</a></li>
+          <li>SVG: <a href='https://developer.mozilla.org/en/SVG'>MDN</a>,
+          <a href='http://www.w3.org/TR/SVG/'>W3C SVG Spec</a></li>
+          <li>CSS: <a href='http://www.w3.org/TR/selectors/'>Selectors
+          Spec</a></li>
+        </ul>
+      </article>
+    </section>
+  </body>
+</html>
