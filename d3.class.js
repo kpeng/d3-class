@@ -41,4 +41,17 @@ $(function() {
       .attr('width', chunk)
       // height attribute
       .attr('height', y);
+
+  // We do the same, except now we create SVG "text" elements
+  chart.selectAll('text')
+    .data(data)
+    .enter().append('text')
+      .attr('x', function(d) { return x(d) + x.rangeBand() / 2; } )
+      .attr('y', function(d) { return height - y(d); })
+      // A delta offset
+      .attr('dy', '-.35em')
+      // Middle-aligned
+      .attr('text-anchor', 'middle')
+      // The text() function takes a function to render the data
+      .text(String);
 });
